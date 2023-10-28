@@ -1,0 +1,16 @@
+{
+    "scripts": [
+        {
+            "name": "create_room",
+            "script": "matrix-locust/client_server/create_room.py",
+            "pre_script_command": ["scripts/start-monitoring.sh"],
+            "pre_script_command_args": ["create_room"],
+            "post_script_command": ["scripts/stop-monitoring.sh"],
+            "post_script_command_args": ["create_room"],
+            "num_users": 60,
+            "spawn_rate": 2,
+            "runtime": "3m",
+            "output_dir": "data/conduit-rocksdb/1000"
+        }
+    ]
+}

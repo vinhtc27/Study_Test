@@ -1,0 +1,119 @@
+{
+    "scripts": [
+        {
+            "name": "register",
+            "script": "matrix-locust/client_server/register.py",
+            "pre_script_command": "scripts/server-setup.sh",
+            "pre_script_command_args": "50000 conduit full-setup",
+            "post_script_command": null,
+            "post_script_command_args": null,
+            "num_users": 1500,
+            "spawn_rate": 25,
+            "runtime": "5m",
+            "autoquit": 5,
+            "output_dir": "data/conduit-rocksdb/50k/t1"
+        },
+        {
+            "name": "create_room",
+            "script": "matrix-locust/client_server/create_room.py",
+            "num_users": 300,
+            "spawn_rate": 10,
+            "runtime": "5m",
+            "output_dir": "data/conduit-rocksdb/50k/t1"
+        },
+        {
+            "name": "join",
+            "script": "matrix-locust/client_server/join.py",
+            "num_users": 2500,
+            "spawn_rate": 25,
+            "runtime": "25m",
+            "output_dir": "data/conduit-rocksdb/50k/t1"
+        },
+        {
+            "name": "chat",
+            "script": "locust-run-users.py",
+            "num_users": 50000,
+            "spawn_rate": 25,
+            "runtime": "40m",
+            "output_dir": "data/conduit-rocksdb/50k/t1"
+        },
+
+
+        {
+            "name": "register",
+            "script": "matrix-locust/client_server/register.py",
+            "pre_script_command": "scripts/server-setup.sh",
+            "pre_script_command_args": "50000 conduit reset",
+            "post_script_command": null,
+            "post_script_command_args": null,
+            "num_users": 1500,
+            "spawn_rate": 25,
+            "runtime": "5m",
+            "autoquit": 5,
+            "output_dir": "data/conduit-rocksdb/50k/t2"
+        },
+        {
+            "name": "create_room",
+            "script": "matrix-locust/client_server/create_room.py",
+            "num_users": 300,
+            "spawn_rate": 10,
+            "runtime": "5m",
+            "output_dir": "data/conduit-rocksdb/50k/t2"
+        },
+        {
+            "name": "join",
+            "script": "matrix-locust/client_server/join.py",
+            "num_users": 2500,
+            "spawn_rate": 25,
+            "runtime": "25m",
+            "output_dir": "data/conduit-rocksdb/50k/t2"
+        },
+        {
+            "name": "chat",
+            "script": "locust-run-users.py",
+            "num_users": 50000,
+            "spawn_rate": 25,
+            "runtime": "40m",
+            "output_dir": "data/conduit-rocksdb/50k/t2"
+        },
+
+
+        {
+            "name": "register",
+            "script": "matrix-locust/client_server/register.py",
+            "pre_script_command": "scripts/server-setup.sh",
+            "pre_script_command_args": "50000 conduit reset",
+            "post_script_command": null,
+            "post_script_command_args": null,
+            "num_users": 1500,
+            "spawn_rate": 25,
+            "runtime": "5m",
+            "autoquit": 5,
+            "output_dir": "data/conduit-rocksdb/50k/t3"
+        },
+        {
+            "name": "create_room",
+            "script": "matrix-locust/client_server/create_room.py",
+            "num_users": 300,
+            "spawn_rate": 10,
+            "runtime": "5m",
+            "output_dir": "data/conduit-rocksdb/50k/t3"
+        },
+        {
+            "name": "join",
+            "script": "matrix-locust/client_server/join.py",
+            "num_users": 2500,
+            "spawn_rate": 25,
+            "runtime": "25m",
+            "output_dir": "data/conduit-rocksdb/50k/t3"
+        },
+        {
+            "name": "chat",
+            "script": "locust-run-users.py",
+            "num_users": 50000,
+            "spawn_rate": 25,
+            "runtime": "40m",
+            "output_dir": "data/conduit-rocksdb/50k/t3"
+        }
+    ]
+}

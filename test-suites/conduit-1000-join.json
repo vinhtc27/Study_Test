@@ -1,0 +1,16 @@
+{
+    "scripts": [
+        {
+            "name": "join",
+            "script": "matrix-locust/client_server/join.py",
+            "pre_script_command": ["scripts/start-monitoring.sh"],
+            "pre_script_command_args": ["join"],
+            "post_script_command": ["scripts/stop-monitoring.sh"],
+            "post_script_command_args": ["join"],
+            "num_users": 120,
+            "spawn_rate": 5,
+            "runtime": "3m",
+            "output_dir": "data/conduit-rocksdb/1000"
+        }
+    ]
+}

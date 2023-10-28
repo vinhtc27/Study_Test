@@ -1,0 +1,155 @@
+{
+    "scripts": [
+        {
+            "name": "register",
+            "script": "matrix-locust/client_server/register.py",
+            "pre_script_command": ["scripts/server-setup.sh", "scripts/start-monitoring.sh"],
+            "pre_script_command_args": ["1000 synapse full-setup-postgres-noworkers copy-users", "register"],
+            "post_script_command": ["scripts/stop-monitoring.sh"],
+            "post_script_command_args": ["register"],
+            "num_users": 100,
+            "spawn_rate": 2,
+            "runtime": "8m",
+            "autoquit": 5,
+            "output_dir": "data/synapse-postgres-noworkers/1k/t1"
+        },
+        {
+            "name": "create_room",
+            "script": "matrix-locust/client_server/create_room.py",
+            "pre_script_command": ["scripts/start-monitoring.sh"],
+            "pre_script_command_args": ["create_room"],
+            "post_script_command": ["scripts/stop-monitoring.sh"],
+            "post_script_command_args": ["create_room"],
+            "num_users": 25,
+            "spawn_rate": 1,
+            "runtime": "8m",
+            "output_dir": "data/synapse-postgres-noworkers/1k/t1"
+        },
+        {
+            "name": "join",
+            "script": "matrix-locust/client_server/join.py",
+            "pre_script_command": ["scripts/start-monitoring.sh"],
+            "pre_script_command_args": ["join"],
+            "post_script_command": ["scripts/stop-monitoring.sh"],
+            "post_script_command_args": ["join"],
+            "num_users": 25,
+            "spawn_rate": 1,
+            "runtime": "8m",
+            "output_dir": "data/synapse-postgres-noworkers/1k/t1"
+        },
+        {
+            "name": "chat",
+            "script": "locust-run-users.py",
+            "pre_script_command": ["scripts/start-monitoring.sh"],
+            "pre_script_command_args": ["chat"],
+            "post_script_command": ["scripts/stop-monitoring.sh"],
+            "post_script_command_args": ["chat remove-tokens"],
+            "num_users": 1000,
+            "spawn_rate": 2,
+            "runtime": "15m",
+            "output_dir": "data/synapse-postgres-noworkers/1k/t1"
+        },
+
+
+        {
+            "name": "register",
+            "script": "matrix-locust/client_server/register.py",
+            "pre_script_command": ["scripts/server-setup.sh", "scripts/start-monitoring.sh"],
+            "pre_script_command_args": ["1000 synapse reset-postgres-noworkers copy-users", "register"],
+            "post_script_command": ["scripts/stop-monitoring.sh"],
+            "post_script_command_args": ["register"],
+            "num_users": 100,
+            "spawn_rate": 2,
+            "runtime": "8m",
+            "autoquit": 5,
+            "output_dir": "data/synapse-postgres-noworkers/1k/t2"
+        },
+        {
+            "name": "create_room",
+            "script": "matrix-locust/client_server/create_room.py",
+            "pre_script_command": ["scripts/start-monitoring.sh"],
+            "pre_script_command_args": ["create_room"],
+            "post_script_command": ["scripts/stop-monitoring.sh"],
+            "post_script_command_args": ["create_room"],
+            "num_users": 25,
+            "spawn_rate": 1,
+            "runtime": "8m",
+            "output_dir": "data/synapse-postgres-noworkers/1k/t2"
+        },
+        {
+            "name": "join",
+            "script": "matrix-locust/client_server/join.py",
+            "pre_script_command": ["scripts/start-monitoring.sh"],
+            "pre_script_command_args": ["join"],
+            "post_script_command": ["scripts/stop-monitoring.sh"],
+            "post_script_command_args": ["join"],
+            "num_users": 25,
+            "spawn_rate": 1,
+            "runtime": "8m",
+            "output_dir": "data/synapse-postgres-noworkers/1k/t2"
+        },
+        {
+            "name": "chat",
+            "script": "locust-run-users.py",
+            "pre_script_command": ["scripts/start-monitoring.sh"],
+            "pre_script_command_args": ["chat"],
+            "post_script_command": ["scripts/stop-monitoring.sh"],
+            "post_script_command_args": ["chat remove-tokens"],
+            "num_users": 1000,
+            "spawn_rate": 2,
+            "runtime": "15m",
+            "output_dir": "data/synapse-postgres-noworkers/1k/t2"
+        },
+
+
+        {
+            "name": "register",
+            "script": "matrix-locust/client_server/register.py",
+            "pre_script_command": ["scripts/server-setup.sh", "scripts/start-monitoring.sh"],
+            "pre_script_command_args": ["1000 synapse reset-postgres-noworkers copy-users", "register"],
+            "post_script_command": ["scripts/stop-monitoring.sh"],
+            "post_script_command_args": ["register"],
+            "num_users": 100,
+            "spawn_rate": 2,
+            "runtime": "8m",
+            "autoquit": 5,
+            "output_dir": "data/synapse-postgres-noworkers/1k/t3"
+        },
+        {
+            "name": "create_room",
+            "script": "matrix-locust/client_server/create_room.py",
+            "pre_script_command": ["scripts/start-monitoring.sh"],
+            "pre_script_command_args": ["create_room"],
+            "post_script_command": ["scripts/stop-monitoring.sh"],
+            "post_script_command_args": ["create_room"],
+            "num_users": 25,
+            "spawn_rate": 1,
+            "runtime": "8m",
+            "output_dir": "data/synapse-postgres-noworkers/1k/t3"
+        },
+        {
+            "name": "join",
+            "script": "matrix-locust/client_server/join.py",
+            "pre_script_command": ["scripts/start-monitoring.sh"],
+            "pre_script_command_args": ["join"],
+            "post_script_command": ["scripts/stop-monitoring.sh"],
+            "post_script_command_args": ["join"],
+            "num_users": 25,
+            "spawn_rate": 1,
+            "runtime": "8m",
+            "output_dir": "data/synapse-postgres-noworkers/1k/t3"
+        },
+        {
+            "name": "chat",
+            "script": "locust-run-users.py",
+            "pre_script_command": ["scripts/start-monitoring.sh"],
+            "pre_script_command_args": ["chat"],
+            "post_script_command": ["scripts/stop-monitoring.sh"],
+            "post_script_command_args": ["chat remove-tokens"],
+            "num_users": 1000,
+            "spawn_rate": 2,
+            "runtime": "15m",
+            "output_dir": "data/synapse-postgres-noworkers/1k/t3"
+        }
+    ]
+}

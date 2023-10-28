@@ -1,0 +1,16 @@
+{
+    "scripts": [
+        {
+            "name": "chat",
+            "script": "locust-run-users.py",
+            "pre_script_command": ["scripts/start-monitoring.sh"],
+            "pre_script_command_args": ["chat"],
+            "post_script_command": ["scripts/stop-monitoring.sh"],
+            "post_script_command_args": ["chat remove-tokens"],
+            "num_users": 1000,
+            "spawn_rate": 4,
+            "runtime": "10m",
+            "output_dir": "data/conduit-rocksdb/1000"
+        }
+    ]
+}

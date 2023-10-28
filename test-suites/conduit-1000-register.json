@@ -1,0 +1,17 @@
+{
+    "scripts": [
+         {
+            "name": "register",
+            "script": "matrix-locust/client_server/register.py",
+            "pre_script_command": ["scripts/server-setup.sh", "scripts/start-monitoring.sh"],
+            "pre_script_command_args": ["1000 conduit full-setup copy-users", "register"],
+            "post_script_command": ["scripts/stop-monitoring.sh"],
+            "post_script_command_args": ["register"],
+            "num_users": 250,
+            "spawn_rate": 10,
+            "runtime": "1m",
+            "autoquit": 5,
+            "output_dir": "data/conduit-rocksdb/1000"
+        }
+    ]
+}
