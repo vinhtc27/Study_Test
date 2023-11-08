@@ -31,7 +31,7 @@
         },
         {
             "name": "chat",
-            "script": "locust-run-users.py",
+            "script": "chat.py",
             "num_users": 50000,
             "spawn_rate": 25,
             "runtime": "40m",
@@ -70,7 +70,7 @@
         },
         {
             "name": "chat",
-            "script": "locust-run-users.py",
+            "script": "chat.py",
             "num_users": 50000,
             "spawn_rate": 25,
             "runtime": "40m",
@@ -109,7 +109,7 @@
         },
         {
             "name": "chat",
-            "script": "locust-run-users.py",
+            "script": "chat.py",
             "num_users": 50000,
             "spawn_rate": 25,
             "runtime": "40m",

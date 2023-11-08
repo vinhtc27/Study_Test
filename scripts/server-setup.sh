@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Required parameters passed in by run.py
+# Required parameters passed in by run.js
 server=$1
 output_dir=$2
 
@@ -23,8 +23,8 @@ mkdir -p $output_dir
 mkdir -p $output_dir/../../../users/$num_users/$trial
 
 if [ "$user_generation" = "generate-users" ]; then
-    python3 generate_users.py $num_users > $output_dir/../../../users/$num_users/$trial/users_log.txt
-    python3 generate_rooms.py > $output_dir/../../../users/$num_users/$trial/rooms_log.txt
+    node generate_users.js $num_users > $output_dir/../../../users/$num_users/$trial/users_log.txt
+    node generate_rooms.js > $output_dir/../../../users/$num_users/$trial/rooms_log.txt
     cp users.csv $output_dir/../../../users/$num_users/$trial/users.csv
     cp rooms.json $output_dir/../../../users/$num_users/$trial/rooms.json
 else # copy-users

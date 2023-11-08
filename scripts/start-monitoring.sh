@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Required parameters passed in by run.py
+# Required parameters passed in by run.js
 server=$1
 output_dir=$2
 

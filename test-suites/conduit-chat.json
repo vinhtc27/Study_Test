@@ -2,7 +2,7 @@
     "scripts": [
         {
             "name": "chat",
-            "script": "locust-run-users.py",
+            "script": "chat.py",
             "pre_script_command": ["scripts/start-monitoring.sh"],
             "pre_script_command_args": ["chat"],
             "post_script_command": ["scripts/stop-monitoring.sh"],
