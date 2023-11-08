@@ -101,7 +101,7 @@ $ python run.py matrix-locust/client_server/join.py
 4. Normal chat activity -- Accepting any pending invites, sending messages, paginating rooms
 
 ```console
-$ python run.py locust-run-users.py
+$ python run.py chat.py
 ```
 
 You can also directly run Locust without using the helper `run.py` script
@@ -134,4 +134,3 @@ The base class for interacting with a Matrix homeserver is [MatrixUser](./matrix
 
 For an example of a class that extends `MatrixUser` to generate traffic
 like a real user, see [MatrixChatUser](./matrixchatuser.py).
-
