@@ -9,7 +9,7 @@
             "post_script_command_args": ["register"],
             "num_users": 250,
             "spawn_rate": 10,
-            "runtime": "1m",
+            "runtime": "100m",
             "autoquit": 5,
             "output_dir": "data/conduit-rocksdb/1000"
         }

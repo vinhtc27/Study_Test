@@ -9,7 +9,7 @@
             "post_script_command_args": ["join"],
             "num_users": 120,
             "spawn_rate": 5,
-            "runtime": "3m",
+            "runtime": "100m",
             "output_dir": "data/conduit-rocksdb/1000"
         }
     ]

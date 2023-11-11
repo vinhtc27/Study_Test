@@ -9,7 +9,7 @@
             "post_script_command_args": ["chat remove-tokens"],
             "num_users": 1000,
             "spawn_rate": 4,
-            "runtime": "10m",
+            "runtime": "100m",
             "output_dir": "data/conduit-rocksdb/1000"
         }
     ]

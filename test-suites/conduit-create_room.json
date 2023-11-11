@@ -9,7 +9,7 @@
             "post_script_command_args": ["create_room"],
             "num_users": 60,
             "spawn_rate": 2,
-            "runtime": "3m",
+            "runtime": "100m",
             "output_dir": "data/conduit-rocksdb/1000"
         }
     ]
