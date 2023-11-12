@@ -42,10 +42,10 @@ function updateTokens(msg) {
 }
 
 export class MatrixUser {
-  constructor() {
+  constructor(username = null, password = null) {
     this.matrix_version = "v3";
-    this.username = null;
-    this.password = null;
+    this.username = username;
+    this.password = password;
     this.user_id = null;
     this.access_token = null;
     this.device_id = null;
@@ -128,7 +128,7 @@ export class MatrixUser {
         requestBody.auth.session = session_id;
       }
 
-      const response2 = http.post(registerUrl, requestBody, {
+      const response2 = http.post(registerUrl, JSON.stringify(requestBody), {
         headers: { "Content-Type": "application/json" },
       });
 
@@ -570,4 +570,14 @@ export class MatrixUser {
     }
   }
   sync_forever() {}
+}
+export default function () {
+  let matrixuser_1 = new MatrixUser(
+    (username = "hungtran"),
+    (password = "123456789")
+  );
+  matrixuser_1.register();
+  matrixuser_1.login();
+  matrixuser_1.set_displayname("helloworld");
+  matrixuser_1.set_avatar_image("avatar.png");
 }
