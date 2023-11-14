@@ -19,7 +19,7 @@ const imgAvatar = open('./avatar.png', 'b');
 // const binFile = open('./avatar.png', 'b');
 
 
-const root_url = "http://localhost:8448/";
+const root_url = "http://localhost:6167/";
 let tokensDict = {};
 
 // if(fs.existsSync('users.csv')) {
@@ -88,7 +88,7 @@ export class MatrixUser {
   }
 
   register(msg) {
-    const url = `http://localhost:8448/_matrix/client/${msg.matrix_version}/register`;
+    const url = `http://localhost:6167/_matrix/client/${msg.matrix_version}/register`;
 
     const requestBody = {
       username: msg.username,
@@ -226,7 +226,7 @@ export class MatrixUser {
 
     this.resetUserState();
 
-    const url = `http://localhost:8448/_matrix/client/v3/login`;
+    const url = `http://localhost:6167/_matrix/client/v3/login`;
 
     const body = {
       type: "m.login.password",
@@ -308,8 +308,8 @@ export class MatrixUser {
       displayname = `User ${userNumber}`;
     }
 
-    const url = `http://localhost:8448/_matrix/client/v3/profile/${this.user_id}/displayname`;
-    const label = `http://localhost:8448/_matrix/client/v3/profile/_/displayname`;
+    const url = `http://localhost:6167/_matrix/client/v3/profile/${this.user_id}/displayname`;
+    const label = `http://localhost:6167/_matrix/client/v3/profile/_/displayname`;
     const body = {
       "displayname": displayname
     };
@@ -369,7 +369,7 @@ export class MatrixUser {
       console.error(`User [${this.username}] Failed to set avatar image`);
       return;
     }
-    const url = `http://localhost:8448/_matrix/client/${this.matrix_version}/profile/${this.user_id}/avatar_url`;
+    const url = `http://localhost:6167/_matrix/client/${this.matrix_version}/profile/${this.user_id}/avatar_url`;
     const body = JSON.stringify({
       avatar_url: mxc_url,
     });
@@ -381,7 +381,7 @@ export class MatrixUser {
 
   async upload_matrix_media(imgAvatar) {
 
-    const url = `http://localhost:8448/_matrix/media/${this.matrix_version}/upload`;
+    const url = `http://localhost:6167/_matrix/media/${this.matrix_version}/upload`;
 
     try {
 
@@ -389,9 +389,9 @@ export class MatrixUser {
         field: 'png',
         file: http.file(imgAvatar, 'test.bin'),
       };
-      
+
       const response = http.post(url, data, {
-          headers: {        
+          headers: {
            "Authorization": `Bearer ${this.access_token}`,
           }
         }
@@ -439,7 +439,7 @@ export default function testMatrixUser() {
 
 // export default function register() {
 //   // const url = `/_matrix/client/${msg.matrix_version}/register`;
-//   const url = `http://localhost:8448/_matrix/client/${msg.matrix_version}/register`;
+//   const url = `http://localhost:6167/_matrix/client/${msg.matrix_version}/register`;
 //   // const url = "https://spec.matrix.org/v1.4/client-server-api/#post_matrixclientv3register"
 
 //   const requestBody = {
