@@ -246,7 +246,6 @@ export class MatrixUser {
       });
       // const response = http.post(url, body, { json: body, tags: { name: 'login' }});
       // console.log(response.status);
-      console.log(response.body);
       check(response, {
         "Login Status is 200": (r) => r.status === 200,
       });
@@ -282,6 +281,7 @@ export class MatrixUser {
       //     this.sync_forever();
       //   }
       // }
+      console.log(this.access_token)
     } catch (error) {
       console.error("Error during login:", error);
     }
@@ -302,25 +302,25 @@ export class MatrixUser {
       displayname = `User ${userNumber}`;
     }
 
-    const url = `http://localhost:8000/_matrix/client/v3/profile/${this.user_id}/displayname`;
-    const label = `http://localhost:8000/_matrix/client/v3/profile/_/displayname`;
+    const url = `http://localhost:8448/_matrix/client/v3/profile/${this.user_id}/displayname`;
+    const label = `http://localhost:8448/_matrix/client/v3/profile/_/displayname`;
     const body = {
-      displayname: displayname,
+      "displayname": displayname
     };
 
     const response = this.matrix_api_call(
       "PUT",
       url,
-      JSON.stringify(body),
+      body,
       label
     );
-    console.log(response.status);
-    console.log(response.body);
     // const response = http.put(url, JSON.stringify(body), { headers: { 'Content-Type': 'application/json' }, tags: { name: 'setDisplayName' } });
 
     check(response, {
       "Set Display Name Status is 200": (r) => r.status === 200,
     });
+
+    console.log(response.status)
 
     if ("error" in response.json()) {
       console.error(`User [${this.username}] failed to set displayname`);
@@ -328,20 +328,20 @@ export class MatrixUser {
   }
 
   matrix_api_call(method, url, body = null, name_tag = null) {
+    console.log(this.user_id)
     if (this.access_token === null) {
       console.warn(`API call to ${url} failed -- No access token`);
       return null;
     }
 
-    const headers = {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      Authorization: `Bearer ${this.access_token}`,
-    };
-
-    return http.request(method, url, {
-      headers: headers,
-      json: body,
+    return http.request(method, url, null,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": `Bearer ${this.access_token}`,
+        },
+        json: body,
       tags: { name: name_tag },
     });
   }
@@ -354,9 +354,10 @@ const msg = {
   username: "user.000001",
   password: "mbgL2vhpuzdLGVCd",
 };
+
 export default function testMatrixUser() {
   let user = new MatrixUser();
-  //user.register(msg);
+  // user.register(msg);
   user.login();
   user.set_displayname("helloworld");
 }
