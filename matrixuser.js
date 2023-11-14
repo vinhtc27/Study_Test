@@ -2,6 +2,8 @@ import { check } from "k6";
 import { SharedArray } from "k6/data";
 import http from "k6/http";
 import papaparse from "https://jslib.k6.io/papaparse/5.1.1/index.js";
+
+import { FormData } from 'https://jslib.k6.io/formdata/0.0.2/index.js';
 // const fs = require('fs');
 // import { someHelper } from './helper.js';
 
@@ -12,6 +14,11 @@ import papaparse from "https://jslib.k6.io/papaparse/5.1.1/index.js";
 const csvData = new SharedArray("another data name", function () {
   return papaparse.parse(open("./users.csv"), { header: true }).data;
 });
+
+const imgAvatar = open('./avatar.png', 'b');
+// const binFile = open('./avatar.png', 'b');
+
+
 const root_url = "http://localhost:8448/";
 let tokensDict = {};
 
@@ -281,7 +288,6 @@ export class MatrixUser {
       //     this.sync_forever();
       //   }
       // }
-      console.log(this.access_token)
     } catch (error) {
       console.error("Error during login:", error);
     }
@@ -346,6 +352,68 @@ export class MatrixUser {
     });
   }
 
+  async set_avatar_image(filename) {
+    if (this.user_id === null) {
+      console.error(
+        `User [${this.username}] Can't set avatar image without a user id`
+      );
+      return;
+    }
+    const imgAvatar = open(`./${filename}`, 'b');
+
+
+    // Upload the file to Matrix
+    // const mxc_url = await upload_matrix_media(data, mime_type);
+    const mxc_url = await upload_matrix_media(imgAvatar);
+    if (mxc_url === null) {
+      console.error(`User [${this.username}] Failed to set avatar image`);
+      return;
+    }
+    const url = `http://localhost:8448/_matrix/client/${this.matrix_version}/profile/${this.user_id}/avatar_url`;
+    const body = JSON.stringify({
+      avatar_url: mxc_url,
+    });
+    const label = `/_matrix/client/${this.matrix_version}/profile/_/avatar_url`;
+
+    const response = await matrix_api_call("POST", url, body, label);
+    return response;
+  }
+
+  async upload_matrix_media(imgAvatar) {
+
+    const url = `http://localhost:8448/_matrix/media/${this.matrix_version}/upload`;
+
+    try {
+
+      const data = {
+        field: 'png',
+        file: http.file(imgAvatar, 'test.bin'),
+      };
+      
+      const response = http.post(url, data, {
+          headers: {        
+           "Authorization": `Bearer ${this.access_token}`,
+          }
+        }
+      );
+
+      console.log(response.status)
+
+      if (response.status === 200) {
+        const responseData = response.json();
+        return responseData.content_uri || null;
+      } else {
+        console.error(
+          `User [${this.username}] Failed to upload media (HTTP ${response.status})`
+        );
+        return null;
+      }
+    } catch (error) {
+      console.error(`Error uploading media: ${error}`);
+      return null;
+    }
+  }
+
   sync_forever() {}
 }
 
@@ -359,7 +427,9 @@ export default function testMatrixUser() {
   let user = new MatrixUser();
   // user.register(msg);
   user.login();
-  user.set_displayname("helloworld");
+  // user.set_displayname("helloworld");
+  // user.set_avatar_image("avatar.png")
+  user.upload_matrix_media()
 }
 // export default function () {
 //   let matrixUser = new MatrixUser();
