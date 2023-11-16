@@ -3,7 +3,7 @@ import { SharedArray } from "k6/data";
 import http from "k6/http";
 import papaparse from "https://jslib.k6.io/papaparse/5.1.1/index.js";
 
-import { FormData } from 'https://jslib.k6.io/formdata/0.0.2/index.js';
+import { FormData } from "https://jslib.k6.io/formdata/0.0.2/index.js";
 // const fs = require('fs');
 // import { someHelper } from './helper.js';
 
@@ -15,9 +15,8 @@ const csvData = new SharedArray("another data name", function () {
   return papaparse.parse(open("./users.csv"), { header: true }).data;
 });
 
-const imgAvatar = open('./avatar.png', 'b');
+const imgAvatar = open("./avatar.png", "b");
 // const binFile = open('./avatar.png', 'b');
-
 
 const root_url = "http://localhost:6167/";
 let tokensDict = {};
@@ -262,7 +261,8 @@ export class MatrixUser {
       this.user_id = responseJson.user_id;
       this.device_id = responseJson.device_id;
       this.matrix_domain = this.user_id.split(":").pop();
-      console.log(this.access_token);
+      // console.log(this.access_token);
+      // console.log(this.user_id);
       const msg = {
         data: {
           username: this.username,
@@ -293,7 +293,7 @@ export class MatrixUser {
     }
   }
 
-  set_displayname(displayname = "noname") {
+  set_displayname(displayname = null) {
     if (!this.user_id) {
       console.error(
         `User [${this.username}] Can't set displayname without a user id`
@@ -311,13 +311,13 @@ export class MatrixUser {
     const url = `http://localhost:6167/_matrix/client/v3/profile/${this.user_id}/displayname`;
     const label = `http://localhost:6167/_matrix/client/v3/profile/_/displayname`;
     const body = {
-      "displayname": displayname
+      displayname: displayname,
     };
 
     const response = this.matrix_api_call(
       "PUT",
       url,
-      body,
+      JSON.stringify(body),
       label
     );
     // const response = http.put(url, JSON.stringify(body), { headers: { 'Content-Type': 'application/json' }, tags: { name: 'setDisplayName' } });
@@ -325,8 +325,7 @@ export class MatrixUser {
     check(response, {
       "Set Display Name Status is 200": (r) => r.status === 200,
     });
-
-    console.log(response.status)
+    console.log(`Status: ${response.status} display name: ${displayname}`);
 
     if ("error" in response.json()) {
       console.error(`User [${this.username}] failed to set displayname`);
@@ -334,21 +333,20 @@ export class MatrixUser {
   }
 
   matrix_api_call(method, url, body = null, name_tag = null) {
-    console.log(this.user_id)
+    console.log(`User id: ${this.user_id}  Access Token: ${this.access_token}`);
     if (this.access_token === null) {
       console.warn(`API call to ${url} failed -- No access token`);
       return null;
     }
-
-    return http.request(method, url, null,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-          "Authorization": `Bearer ${this.access_token}`,
-        },
-        json: body,
-      tags: { name: name_tag },
+    return http.request(method, url, body, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${this.access_token}`,
+      },
+      tags: {
+        name: name_tag ? name_tag : "noname",
+      },
     });
   }
 
@@ -359,8 +357,7 @@ export class MatrixUser {
       );
       return;
     }
-    const imgAvatar = open(`./${filename}`, 'b');
-
+    const imgAvatar = open(`./${filename}`, "b");
 
     // Upload the file to Matrix
     // const mxc_url = await upload_matrix_media(data, mime_type);
@@ -375,29 +372,26 @@ export class MatrixUser {
     });
     const label = `/_matrix/client/${this.matrix_version}/profile/_/avatar_url`;
 
-    const response = await matrix_api_call("POST", url, body, label);
+    const response = this.matrix_api_call("POST", url, body, label);
     return response;
   }
 
   async upload_matrix_media(imgAvatar) {
-
     const url = `http://localhost:6167/_matrix/media/${this.matrix_version}/upload`;
 
     try {
-
       const data = {
-        field: 'png',
-        file: http.file(imgAvatar, 'test.bin'),
+        field: "png",
+        file: http.file(imgAvatar, "test.bin"),
       };
 
       const response = http.post(url, data, {
-          headers: {
-           "Authorization": `Bearer ${this.access_token}`,
-          }
-        }
-      );
+        headers: {
+          Authorization: `Bearer ${this.access_token}`,
+        },
+      });
 
-      console.log(response.status)
+      console.log(response.status);
 
       if (response.status === 200) {
         const responseData = response.json();
@@ -413,6 +407,67 @@ export class MatrixUser {
       return null;
     }
   }
+  createRoom(alias, roomName, userIds = []) {
+    const url = `http://localhost:6167/_matrix/client/${this.matrix_version}/createRoom`;
+    const requestBody = {
+      preset: "private_chat",
+      name: roomName,
+      invite: userIds,
+    };
+
+    if (alias !== null) {
+      requestBody.room_alias_name = alias;
+    }
+
+    try {
+      const response = this.matrix_api_call(
+        "POST",
+        url,
+        JSON.stringify(requestBody)
+      );
+      const room_id = JSON.parse(response.body).room_id;
+      if (room_id === null) {
+        console.error(
+          `User [${this.username}] Failed to create room for [${roomName}]`
+        );
+        console.error(`${response.error_code}: ${response.error}`);
+        return null;
+      } else {
+        console.log(`User [${this.username}] Created room [${room_id}]`);
+        return room_id;
+      }
+    } catch (error) {
+      console.error(`An error occurred:${error}`);
+      return null;
+    }
+    // Not sure how we might end up here, but just to be safe...
+    // return null;
+  }
+  get_user_avatar_url(user_id) {
+    const url = `http://localhost:6167/_matrix/client/v3/profile/${user_id}/avatar_url`;
+    const label = `http://localhost:6167/_matrix/client/v3/profile/_/avatar_url`;
+
+    try {
+      const response = matrix_api_call("GET", url, null, label);
+      const avatar_url = JSON.parse(response.body).avatar_url || null;
+      this.user_avatar_urls[user_id] = avatar_url;
+    } catch (error) {
+      console.error(`Error fetching user's avatar URL: ${error}`);
+    }
+  }
+  get_user_displayname(user_id) {
+    const url = `http://localhost:6167/_matrix/client/v3/profile/${user_id}/displayname`;
+    const label = `http://localhost:6167/_matrix/client/v3/profile/_/displayname`;
+
+    try {
+      const response = this.matrix_api_call("GET", url, null, label);
+      const displayname = JSON.parse(response.body).displayname || null;
+      this.user_display_names[user_id] = displayname;
+      return displayname;
+    } catch (error) {
+      console.error(`Error fetching user's display name: ${error}`);
+    }
+  }
 
   sync_forever() {}
 }
@@ -423,13 +478,25 @@ const msg = {
   password: "mbgL2vhpuzdLGVCd",
 };
 
+const msg1 = {
+  matrix_version: "v3",
+  username: "user.000000",
+  password: "nk8rIu7Hg5VCwrr9",
+};
 export default function testMatrixUser() {
   let user = new MatrixUser();
-  // user.register(msg);
+  let user_id_list = [
+    "@user.000000:matrix.conduit.local",
+    "@user.000001:matrix.conduit.local",
+  ];
+  //user.register(msg1);
   user.login();
+  user.set_displayname("hello1");
+  console.log(user.get_user_displayname("@user.000001:matrix.conduit.local"));
+  //user.createRoom(null, "localroom", user_id_list);
   // user.set_displayname("helloworld");
   // user.set_avatar_image("avatar.png")
-  user.upload_matrix_media()
+  //user.upload_matrix_media();
 }
 // export default function () {
 //   let matrixUser = new MatrixUser();
