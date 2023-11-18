@@ -425,6 +425,11 @@ export class MatrixUser {
         url,
         JSON.stringify(requestBody)
       );
+
+      check(response, {
+        "createRoom Status is 200": (response) => response.status === 200
+      });
+
       const room_id = JSON.parse(response.body).room_id;
       if (room_id === null) {
         console.error(
@@ -443,6 +448,7 @@ export class MatrixUser {
     // Not sure how we might end up here, but just to be safe...
     // return null;
   }
+
   get_user_avatar_url(user_id) {
     const url = `http://localhost:6167/_matrix/client/v3/profile/${user_id}/avatar_url`;
     const label = `http://localhost:6167/_matrix/client/v3/profile/_/avatar_url`;
@@ -469,6 +475,136 @@ export class MatrixUser {
     }
   }
 
+  loadRoomData(room_id) {
+    // Load the avatars for recent users
+    // Load the thumbnails for any messages that have one
+    const messages = this.recent_messages[room_id] || [];
+
+    for (const message of messages) {
+      const senderUserId = message.sender;
+      let senderAvatarMxc = this.user_avatar_urls[senderUserId];
+
+      if (!senderAvatarMxc) {
+        // Fetch the avatar URL for senderUserId
+        senderAvatarMxc = get_user_avatar_url(senderUserId);
+      }
+
+      if (senderAvatarMxc && senderAvatarMxc.length > 0) {
+        download_matrix_media(senderAvatarMxc);
+      }
+
+      let senderDisplayname = user_display_names[senderUserId];
+
+      if (!senderDisplayname) {
+        senderDisplayname = get_user_displayname(senderUserId);
+      }
+    }
+
+    for (const message of messages) {
+      const content = message.content;
+      const msgtype = content.msgtype;
+
+      if (["m.image", "m.video", "m.file"].includes(msgtype)) {
+        const thumbMxc = content.thumbnail_url;
+
+        if (thumbMxc) {
+          download_matrix_media(thumbMxc);
+        }
+      }
+    }
+  }
+
+  getRandomRoomId() {
+    if (this.joined_room_ids.length > 0) {
+      const roomIds = Array.from(this.joined_room_ids);
+      const randomIndex = Math.floor(Math.random() * roomIds.length);
+      return roomIds[randomIndex];
+    } else {
+      return null;
+    }
+  }
+
+  joinRoom(roomId) {
+    if (this.joined_room_ids.has(roomId)) {
+      // Looks like we already joined. Peace out.
+      return;
+    }
+
+    console.log(`User [${this.username}] joining room ${roomId}`);
+    const url = `http://localhost:6167/_matrix/client/${this.matrix_version}/rooms/${roomId}/join`;
+    const label = `http://localhost:6167/_matrix/client/${this.matrix_version}/rooms/_/join`;
+
+    try {
+      const response = this.matrix_api_call("POST", url, null, label);
+
+      if (!response) {
+        console.error(
+          `User [${this.username}] Failed to join room ${roomId} - timeout`
+        );
+        return null;
+      }
+
+      check(response, {
+        "joinRoom Status is 200": (r) => r.status === 200,
+      });
+
+      if ("room_id" in response.json()) {
+        console.log(`User [${this.username}] Joined room ${roomId}`);
+        this.joined_room_ids.add(roomId);
+        this.invited_room_ids.delete(roomId);
+        this.loadRoomData(roomId);
+        return response.json().roomId;
+      } else {
+        console.warn(
+          `User [${this.username}] Failed to join room ${roomId} - ${
+            response.error_code || "???"
+          }: ${response.error || "Unknown"}`
+        );
+        return null;
+      }
+    } catch (error) {
+      console.error(`Error joining room: ${error}`);
+      return null;
+    }
+  }
+
+  setTyping(roomId, isTyping) {
+    const url = `http://localhost:6167/_matrix/client/${this.matrix_version}/rooms/${roomId}/typing/${this.user_id}`;
+
+    const body = JSON.stringify({
+      timeout: 10 * 1000,
+      typing: isTyping,
+    });
+
+    const label = `http://localhost:6167/_matrix/client/${this.matrix_version}/rooms/_/typing/_`;
+
+    try {
+      const response = this.matrix_api_call("PUT", url, body, label);
+
+      check(response, {
+        "setTyping Status is 200": (r) => r.status === 200
+      });
+    } catch (error) {
+      console.error(`Error setting typing status: ${error}`);
+    }
+  }
+
+  sendReadReceipt(roomId, eventId) {
+    const url = `http://localhost:6167/_matrix/client/${this.matrix_version}/rooms/${roomId}/receipt/m.read/${eventId}`;
+    const body = JSON.stringify({ "thread_id": "main" });
+    const label = `http://localhost:6167/_matrix/client/${this.matrix_version}/rooms/_/receipt/m.read/_`;
+
+    try {
+      const response = this.matrix_api_call("POST", url, body, label);
+
+      check(response, {
+        "sendReadReceipt Status is 200": (r) => r.status === 200
+      });
+    } catch (error) {
+      console.error(`Error sending read receipt: ${error}`);
+    }
+  }
+
   sync_forever() {}
 }
 
@@ -489,14 +625,19 @@ export default function testMatrixUser() {
     "@user.000000:matrix.conduit.local",
     "@user.000001:matrix.conduit.local",
   ];
-  //user.register(msg1);
-  user.login();
-  user.set_displayname("hello1");
-  console.log(user.get_user_displayname("@user.000001:matrix.conduit.local"));
-  //user.createRoom(null, "localroom", user_id_list);
+  // user.register(msg);
+  // user.login();
+  //user.set_displayname("hello1");
+  //console.log(user.get_user_displayname("@user.000001:matrix.conduit.local"));
+  // const room_id = user.createRoom(null, "localroom", user_id_list);
   // user.set_displayname("helloworld");
   // user.set_avatar_image("avatar.png")
-  //user.upload_matrix_media();
+  // user.upload_matrix_media();
+  // user.joinRoom(room_id)
+  // user.setTyping(room_id, true)
+  // user.sendReadReceipt(room_id, "event_id")
+  // user.loadRoomData(idroom)
+  // user.getRandomRoomId()
 }
 // export default function () {
 //   let matrixUser = new MatrixUser();
