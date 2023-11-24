@@ -19,7 +19,8 @@ export const options = {
   },
 };
 
-export default function login (start_syncing = false, log_request = false) {
+//export default
+function login (start_syncing = false, log_request = false) {
   const url = `http://localhost:6167/_matrix/client/v3/login`;
 
   const user = csvData[scenario.iterationInTest];
@@ -58,8 +59,8 @@ export default function login (start_syncing = false, log_request = false) {
   }
 }
 
-// export default 
-function register() {
+// export default
+export default  function register() {
   const user = csvData[scenario.iterationInTest];
   JSON.stringify(user)
 
@@ -714,129 +715,3 @@ class MatrixUser {
 
   sync_forever() {}
 }
-
-// const msg = {
-//   matrix_version: "v3",
-//   username: "user.000001",
-//   password: "mbgL2vhpuzdLGVCd",
-// };
-
-// const msg1 = {
-//   matrix_version: "v3",
-//   username: "user.000000",
-//   password: "nk8rIu7Hg5VCwrr9",
-// };
-// export default function testMatrixUser() {
-//   let user = new MatrixUser();
-//   let user_id_list = [
-//     "@user.000000:matrix.conduit.local",
-//     "@user.000001:matrix.conduit.local",
-//   ];
-  // user.register(msg);
-  // user.login();
-  //user.set_displayname("hello1");
-  //console.log(user.get_user_displayname("@user.000001:matrix.conduit.local"));
-  // const room_id = user.createRoom(null, "localroom", user_id_list);
-  // user.set_displayname("helloworld");
-  // user.set_avatar_image("avatar.png")
-  // user.upload_matrix_media();
-  // user.joinRoom(room_id)
-  // user.setTyping(room_id, true)
-  // user.sendReadReceipt(room_id, "event_id")
-  // user.loadRoomData(idroom)
-  // user.getRandomRoomId()
-//}
-// export default function () {
-//   let matrixUser = new MatrixUser();
-//   console.log(matrixUser)
-//   return matrixUser.register(data)
-// }
-
-// export default function register() {
-//   // const url = `/_matrix/client/${msg.matrix_version}/register`;
-//   const url = `http://localhost:6167/_matrix/client/${msg.matrix_version}/register`;
-//   // const url = "https://spec.matrix.org/v1.4/client-server-api/#post_matrixclientv3register"
-
-//   const requestBody = {
-//     username: "duyhungtran",
-//     password: "nk8rIu7Hg5VCwrr9",
-//     inhibit_login: false,
-//   };
-
-//   const registerResponse = http.post(url, JSON.stringify(requestBody), {
-//     headers: { "Content-Type": "application/json" },
-//   });
-
-//   check(registerResponse, {
-//     "Register Status is 200": (r) => r.status === 200,
-//   });
-//   console.log(registerResponse.status);
-//   console.log(registerResponse.body);
-
-//   if (registerResponse.status === 200) {
-//     console.log(`User [${msg.username}] Success! Didn't even need UIAA!`);
-//     const registerData = JSON.parse(registerResponse.body);
-
-//     const user_id = registerData.user_id;
-//     const access_token = registerData.access_token;
-
-//     if (!user_id || !access_token) {
-//       console.error(
-//         `User [${msg.username}] Failed to parse /register response!\nResponse: ${registerResponse.body}`
-//       );
-//       return;
-//     }
-//   } else if (registerResponse.status === 401) {
-//     console.log(`User [${msg.username}] Handling UIAA flow`);
-
-//     const flows = JSON.parse(registerResponse.body).flows;
-
-//     if (!flows || flows.length === 0) {
-//       console.error(
-//         `User [${msg.username}] No UIAA flows for /register\nResponse: ${registerResponse.body}`
-//       );
-//       return;
-//     }
-
-//     requestBody.auth = {
-//       type: "m.login.dummy",
-//     };
-
-//     const session_id = JSON.parse(registerResponse.body).session;
-
-//     if (session_id) {
-//       requestBody.auth.session = session_id;
-//     }
-
-//     const response2 = http.post(url, JSON.stringify(requestBody), {
-//       headers: { "Content-Type": "application/json" },
-//     });
-
-//     check(response2, {
-//       "Register Status is 200 or 201": (r) =>
-//         r.status === 200 || r.status === 201,
-//     });
-
-//     if (response2.status === 200 || response2.status === 201) {
-//       console.log(`User [${msg.username}] Success!`);
-//       const response2Data = JSON.parse(response2.body);
-
-//       const user_id = response2Data.user_id;
-//       const access_token = response2Data.access_token;
-
-//       if (!user_id || !access_token) {
-//         console.error(
-//           `User [${msg.username}] Failed to parse /register response!\nResponse: ${response2.body}`
-//         );
-//       }
-//     } else {
-//       console.error(
-//         `User [${msg.username}] /register failed with status code ${response2.status}\nResponse: ${response2.body}`
-//       );
-//     }
-//   } else {
-//     console.error(
-//       `User [${msg.username}] /register failed with status code ${registerResponse.status}\nResponse: ${registerResponse.body}`
-//     );
-//   }
-// }
