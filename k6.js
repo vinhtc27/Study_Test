@@ -1,19 +1,149 @@
 import { check } from "k6";
 import { SharedArray } from "k6/data";
+import { scenario } from 'k6/execution';
 import http from "k6/http";
 import papaparse from "https://jslib.k6.io/papaparse/5.1.1/index.js";
-
-import { FormData } from "https://jslib.k6.io/formdata/0.0.2/index.js";
-// const fs = require('fs');
-// import { someHelper } from './helper.js';
-
-// export default function () {
-//   someHelper();
-// }
 
 const csvData = new SharedArray("another data name", function () {
   return papaparse.parse(open("./users.csv"), { header: true }).data;
 });
+
+export const options = {
+  scenarios: {
+    'use-all-the-data': {
+      executor: 'shared-iterations',
+      vus: 10,
+      iterations: csvData.length - 1,
+      maxDuration: '1h',
+    },
+  },
+};
+
+export default function login (start_syncing = false, log_request = false) {
+  const url = `http://localhost:6167/_matrix/client/v3/login`;
+
+  const user = csvData[scenario.iterationInTest];
+  JSON.stringify(user)
+
+  if (!user.username || !user.password) {
+    console.error("No username or password");
+    return;
+  }
+
+  const body = {
+    type: "m.login.password",
+    identifier: {
+      type: "m.id.user",
+      user: user.username,
+    },
+    password: user.password,
+  };
+
+  try {
+    const response = http.post(url, JSON.stringify(body), {
+      headers: { "Content-Type": "application/json" },
+    });
+    check(response, {
+      "Login Status is 200": (r) => r.status === 200,
+    });
+
+    const responseJson = JSON.parse(response.body);
+    if( response.status != 200) {
+      console.error(`User ${responseJson.user_id} login fail"`)
+    }
+    console.log(responseJson)
+
+  } catch (error) {
+    console.error(`User ${user.username} Error during login:`, error);
+  }
+}
+
+// export default 
+function register() {
+  const user = csvData[scenario.iterationInTest];
+  JSON.stringify(user)
+
+  const url = `http://localhost:6167/_matrix/client/v3/register`;
+
+  const requestBody = {
+    username: user.username,
+    password: user.password,
+    inhibit_login: false,
+  };
+
+  const registerResponse = http.post(url, JSON.stringify(requestBody), {
+    headers: { "Content-Type": "application/json" },
+  });
+
+  check(registerResponse, {
+    "Register Status is 200": (r) => r.status === 200,
+  });
+
+  if (registerResponse.status === 200) {
+    console.log(`User [${user.username}] Success! Didn't even need UIAA!`);
+    const registerData = JSON.parse(registerResponse.body);
+
+    const user_id = registerData.user_id;
+    const access_token = registerData.access_token;
+
+    if (!user_id || !access_token) {
+      console.error(
+        `User [${user.username}] Failed to parse /register response!\nResponse: ${registerResponse.body}`
+      );
+      return;
+    }
+  } else if (registerResponse.status === 401) {
+    const flows = JSON.parse(registerResponse.body).flows;
+
+    if (!flows || flows.length === 0) {
+      console.error(
+        `User [${user.username}] No UIAA flows for /register\nResponse: ${registerResponse.body}`
+      );
+      return;
+    }
+
+    requestBody.auth = {
+      type: "m.login.dummy",
+    };
+
+    const session_id = JSON.parse(registerResponse.body).session;
+
+    if (session_id) {
+      requestBody.auth.session = session_id;
+    }
+
+    const response2 = http.post(url, JSON.stringify(requestBody), {
+      headers: { "Content-Type": "application/json" },
+    });
+
+    check(response2, {
+      "Register Status second is 200 or 201": (r) =>
+        r.status === 200 || r.status === 201,
+    });
+
+    if (response2.status === 200 || response2.status === 201) {
+      console.log(`User [${user.username}] Success!`);
+      const response2Data = JSON.parse(response2.body);
+
+      const user_id = response2Data.user_id;
+      const access_token = response2Data.access_token;
+
+      if (!user_id || !access_token) {
+        console.error(
+          `User [${user.username}] Failed to parse /register response!\nResponse: ${response2.body}`
+        );
+      }
+    } else {
+      console.error(
+        `User [${user.username}] /register failed with status code ${response2.status}\nResponse: ${response2.body}`
+      );
+    }
+  } else {
+    console.error(
+      `User [${user.username}] /register failed with status code ${registerResponse.status}\nResponse: ${registerResponse.body}`
+    );
+  }
+}
 
 const imgAvatar = open("./avatar.png", "b");
 // const binFile = open('./avatar.png', 'b');
@@ -53,7 +183,7 @@ function updateTokens(msg) {
   console.log(tokensDict);
 }
 
-export class MatrixUser {
+class MatrixUser {
   constructor() {
     this.matrix_version = "v3";
     this.username = null;
@@ -237,16 +367,6 @@ export class MatrixUser {
     };
 
     try {
-      // const requestArgs = {
-      //   method: "POST",
-      //   url: url,
-      //   json: JSON.stringify(body),
-      // };
-
-      // const request = log_request ? this.rest : this.client.request;
-      // requestArgs.catch_response = !log_request;
-
-      // const response = request(requestArgs);
       const response = http.post(url, JSON.stringify(body), {
         headers: { "Content-Type": "application/json" },
       });
@@ -275,19 +395,6 @@ export class MatrixUser {
       // Refresh tokens stored in the csv file
       updateTokens(msg);
       console.log(msg);
-      // if (start_syncing && this.access_token) {
-      //   // Spawn a new VU to act as this user's client, constantly syncing with the server
-      //   this.sync_timeout = 30;
-      //   this.matrix_sync_task = setInterval(() => {
-      //     this.sync_fo;
-      //   }, 1000);
-      //   const syncInterval = 1; // seconds
-      //   const iterations = syncTimeout / syncInterval;
-
-      //   for (let i = 0; i < iterations; i++) {
-      //     this.sync_forever();
-      //   }
-      // }
     } catch (error) {
       console.error("Error during login:", error);
     }
@@ -608,23 +715,23 @@ export class MatrixUser {
   sync_forever() {}
 }
 
-const msg = {
-  matrix_version: "v3",
-  username: "user.000001",
-  password: "mbgL2vhpuzdLGVCd",
-};
+// const msg = {
+//   matrix_version: "v3",
+//   username: "user.000001",
+//   password: "mbgL2vhpuzdLGVCd",
+// };
 
-const msg1 = {
-  matrix_version: "v3",
-  username: "user.000000",
-  password: "nk8rIu7Hg5VCwrr9",
-};
-export default function testMatrixUser() {
-  let user = new MatrixUser();
-  let user_id_list = [
-    "@user.000000:matrix.conduit.local",
-    "@user.000001:matrix.conduit.local",
-  ];
+// const msg1 = {
+//   matrix_version: "v3",
+//   username: "user.000000",
+//   password: "nk8rIu7Hg5VCwrr9",
+// };
+// export default function testMatrixUser() {
+//   let user = new MatrixUser();
+//   let user_id_list = [
+//     "@user.000000:matrix.conduit.local",
+//     "@user.000001:matrix.conduit.local",
+//   ];
   // user.register(msg);
   // user.login();
   //user.set_displayname("hello1");
@@ -638,7 +745,7 @@ export default function testMatrixUser() {
   // user.sendReadReceipt(room_id, "event_id")
   // user.loadRoomData(idroom)
   // user.getRandomRoomId()
-}
+//}
 // export default function () {
 //   let matrixUser = new MatrixUser();
 //   console.log(matrixUser)
